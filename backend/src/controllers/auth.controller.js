@@ -9,23 +9,28 @@ import { generateOTP } from "../utils/generateOTP.js";
 import { otpTemplate } from "../utils/emailTemplate.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const { name, email, username, password } = req.body;
+    if (!name || !email || !username || !password) {
         throw new ApiError(400, "All fields are required");
     }
-    const isUserExist = await userModel.findOne({ email });
+    const isUserExist = await userModel.findOne({ 
+        $or: [{ email }, { username }]
+    });
+
     if (isUserExist) {
-        throw new ApiError(400, "User already exists");
+        const field = isUserExist.email === email ? "Email" : "Username";
+        throw new ApiError(400, `${field} already exists`);
     }
     const otp = generateOTP();
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await userModel.create({
         name,
         email,
+        username,
         password: hashedPassword,
         otp: {
             code: otp,
-            expiresAt: Date.now() + 10 * 60 * 1000,
+            expiresAt: Date.now() + 1 * 60 * 1000,
         },
     });
     
@@ -43,8 +48,17 @@ export const registerUser = asyncHandler(async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const userResponse = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        isVerified: user.isVerified,
+        avatar: user.avatar,
+    };
+
     res.status(201).json(
-        new ApiResponse(201, { token }, "User registered successfully. Please verify your email.")
+        new ApiResponse(201, { user: userResponse, token }, "User registered successfully. Please verify your email.")
     );
 });
 
@@ -99,7 +113,7 @@ export const sendOTP = asyncHandler(async (req, res) => {
     const otp = generateOTP();
     user.otp = {
         code: otp,
-        expiresAt: Date.now() + 10 * 60 * 1000,
+        expiresAt: Date.now() + 1 * 60 * 1000,
     };
     await user.save();
 
@@ -112,13 +126,21 @@ export const sendOTP = asyncHandler(async (req, res) => {
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
 
-    if (!email || !password) {
-        throw new ApiError(400, "Email and password are required");
+    const loginIdentifier = email || username;
+
+    if (!loginIdentifier || !password) {
+        throw new ApiError(400, "Login identifier and password are required");
     }
 
-    const user = await userModel.findOne({ email }).select("+password");
+    const user = await userModel.findOne({
+        $or: [
+            { email: loginIdentifier.toLowerCase() },
+            { username: loginIdentifier.toLowerCase() },
+            { name: { $regex: new RegExp("^" + loginIdentifier + "$", "i") } }
+        ]
+    }).select("+password");
 
     if (!user) {
         throw new ApiError(404, "User does not exist");
@@ -145,8 +167,17 @@ export const loginUser = asyncHandler(async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    const userResponse = {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        isVerified: user.isVerified,
+        avatar: user.avatar,
+    };
+
     res.status(200).json(
-        new ApiResponse(200, { token }, "Logged in successfully")
+        new ApiResponse(200, { user: userResponse, token }, "Logged in successfully")
     );
 });
 
@@ -159,5 +190,15 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
     res.status(200).json(
         new ApiResponse(200, {}, "Logged out successfully")
+    );
+});
+
+export const getMe = asyncHandler(async (req, res) => {
+    const user = await userModel.findById(req.user._id).select("-password");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    res.status(200).json(
+        new ApiResponse(200, { user }, "User fetched successfully")
     );
 });
