@@ -55,7 +55,7 @@ const RegistrationForm = () => {
             value={username}
             type="text"
             name="username"
-            placeholder="Enter a unique username"
+            placeholder="Enter username"
             className="bg-[#2a2b2b] text-white/90 font-medium placeholder-white/30 px-4 py-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#20b8cd]/50 border border-[#353636] transition"
           />
           <input
