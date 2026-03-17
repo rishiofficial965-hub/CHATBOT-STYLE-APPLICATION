@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useSelector } from "react-redux";
 import Nav from "../components/Nav";
 import Loader from "../components/Loader";
 
@@ -13,22 +13,25 @@ const RegistrationForm = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const { handleRegister, loading } = useAuth();
+  const { handleRegister, loading } = useSelector((state) => state.auth);
   if (loading) return <Loader />;
-
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await handleRegister(name, email, username, password);
-      navigate("/verify-otp");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+    setError("");
+    
+    const result = await handleRegister(name, email, username, password);
+
+    if (!result.success) {
+      setError(result.error || "Registration failed");
+      return;
     }
+
+    navigate("/verify-otp");
     setName("");
     setEmail("");
     setUsername("");
     setPassword("");
-  }
+  };
 
   return (
     <main className="relative flex justify-center items-center h-screen bg-[#191a1a]">

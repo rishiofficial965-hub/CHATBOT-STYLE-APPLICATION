@@ -1,8 +1,8 @@
-import { useAuth } from "../hooks/useAuth";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const Home = () => {
-  const { user, handleLogout } = useAuth();
+const Dashboard = () => {
+  const { user, handleLogout } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const onLogout = () => {
@@ -46,4 +46,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

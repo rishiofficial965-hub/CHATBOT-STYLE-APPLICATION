@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth.js";
+import { useSelector } from "react-redux";
 import Nav from "../components/Nav";
 import Loader from "../components/Loader";
 
@@ -13,7 +13,7 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const { handleLogin, loading } = useAuth();
+  const { handleLogin, loading } = useSelector((state) => state.auth);
 
   if (loading) return <Loader />;
 
@@ -33,7 +33,7 @@ const LoginForm = () => {
       return;
     }
     
-    navigate("/home");
+    navigate("/dashboard");
     setEmail("");
     setUsername("");
     setPassword("");

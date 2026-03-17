@@ -30,7 +30,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         password: hashedPassword,
         otp: {
             code: otp,
-            expiresAt: Date.now() + 1 * 60 * 1000,
+            expiresAt: Date.now() + 5 * 60 * 1000, // Increased to 5 minutes
         },
     });
     
@@ -113,7 +113,7 @@ export const sendOTP = asyncHandler(async (req, res) => {
     const otp = generateOTP();
     user.otp = {
         code: otp,
-        expiresAt: Date.now() + 1 * 60 * 1000,
+        expiresAt: Date.now() + 5 * 60 * 1000, // Increased to 5 minutes
     };
     await user.save();
 
@@ -137,8 +137,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     const user = await userModel.findOne({
         $or: [
             { email: loginIdentifier.toLowerCase() },
-            { username: loginIdentifier.toLowerCase() },
-            { name: { $regex: new RegExp("^" + loginIdentifier + "$", "i") } }
+            { username: loginIdentifier.toLowerCase() }
         ]
     }).select("+password");
 

@@ -17,7 +17,6 @@ export async function register(name, email, username, password) {
     });
     return response.data.data.user;
   } catch (err) {
-    console.error("Registration error:", err);
     throw err;
   }
 }
@@ -40,7 +39,6 @@ export async function getMe() {
   try {
     const response = await api.get("/auth/get-me");
     return response.data.data.user;
-    
   } catch (err) {
     console.error("GetMe error:", err);
     throw err;

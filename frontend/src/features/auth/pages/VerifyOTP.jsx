@@ -29,9 +29,9 @@ const VerifyOTP = () => {
 
     const result = await handleVerifyOTP(otp);
     if (result.success) {
-      navigate("/home");
+      navigate("/dashboard");
     } else {
-      setError(result.error);
+      setError(result.error || "Verification failed");
     }
   };
 

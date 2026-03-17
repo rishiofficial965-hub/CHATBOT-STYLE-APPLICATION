@@ -2,7 +2,8 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./features/auth/pages/LoginForm";
 import RegistrationForm from "./features/auth/pages/RegistrationForm";
 import VerifyOTP from "./features/auth/pages/VerifyOTP";
-import Home from "./features/auth/pages/Home";
+import Dashboard from "./features/chat/pages/Dashboard";
+import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +23,11 @@ export const router = createBrowserRouter([
     element: <VerifyOTP />,
   },
   {
-    path: "/home",
-    element: <Home />,
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
 ]);
