@@ -4,6 +4,7 @@ import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
 import { ApiError } from "./utils/ApiError.js";
 import morgan from "morgan";
+import chatRouter from "./routes/chat.routes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"))
 
 app.use("/api/auth", authRouter);
+app.use("/api/chats", chatRouter);
 
 app.use((err, req, res, next) => {
     if (err instanceof ApiError) {

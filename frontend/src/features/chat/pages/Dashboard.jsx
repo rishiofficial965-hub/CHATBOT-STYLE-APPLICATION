@@ -1,5 +1,7 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useChat } from "../hooks/useChat";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const { user, handleLogout } = useSelector((state) => state.auth);
@@ -8,6 +10,12 @@ const Dashboard = () => {
   const onLogout = () => {
     handleLogout();
     navigate("/login");
+
+    const chat = useChat();
+
+    useEffect(() => {
+      chat.initializeSocketConnection();
+    }, []);
   };
 
   return (
@@ -20,18 +28,23 @@ const Dashboard = () => {
         <div className="text-center">
           <h1 className="text-3xl font-light text-white/90 mb-2">Welcome!</h1>
           <p className="text-white/50 font-medium">
-            Logged in as <span className="text-[#20b8cd]">@{user?.name || "user"}</span>
+            Logged in as{" "}
+            <span className="text-[#20b8cd]">@{user?.name || "user"}</span>
           </p>
         </div>
 
         <div className="w-full flex flex-col gap-3 mt-2">
           <div className="bg-[#2a2b2b] p-4 rounded-xl border border-[#353636] flex items-center gap-4">
             <i className="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-            <span className="text-white/70 font-medium text-sm">Registration Complete</span>
+            <span className="text-white/70 font-medium text-sm">
+              Registration Complete
+            </span>
           </div>
           <div className="bg-[#2a2b2b] p-4 rounded-xl border border-[#353636] flex items-center gap-4">
             <i className="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-            <span className="text-white/70 font-medium text-sm">OTP Verified</span>
+            <span className="text-white/70 font-medium text-sm">
+              OTP Verified
+            </span>
           </div>
         </div>
 

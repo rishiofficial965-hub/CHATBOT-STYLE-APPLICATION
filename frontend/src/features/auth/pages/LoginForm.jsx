@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import useAuth from "../hooks/useAuth";
 import Nav from "../components/Nav";
 import Loader from "../components/Loader";
 
@@ -13,7 +13,7 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const { handleLogin, loading } = useSelector((state) => state.auth);
+  const { handleLogin, loading } = useAuth();
 
   if (loading) return <Loader />;
 
