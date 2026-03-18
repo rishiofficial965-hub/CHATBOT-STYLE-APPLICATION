@@ -1,5 +1,9 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  HumanMessage,
+  SystemMessage,
+  AIMessage,
+} from "@langchain/core/messages";
 import { ChatMistralAI } from "@langchain/mistralai";
 
 const geminiModel = new ChatGoogleGenerativeAI({
@@ -13,18 +17,29 @@ const mistralModel = new ChatMistralAI({
 
 export async function askAI(message) {
   try {
-    const response = await geminiModel.invoke([new HumanMessage(message)]);
+    const formattedMessages = Array.isArray(message)
+      ? message.map((m) => {
+          if (m.role === "user") return new HumanMessage(m.content);
+          return new AIMessage(m.content);
+        })
+      : [new HumanMessage(message)];
+
+    const response = await geminiModel.invoke(formattedMessages);
+
     return response.text;
   } catch (error) {
     console.error("AI Error Full:", error);
+    return "AI failed to respond";
   }
 }
 
 export async function generateChatTitle(message) {
   const response = await mistralModel.invoke([
-    new SystemMessage("You are a chat title generator. Generate a concise and descriptive title for the given chat message."),
-    new HumanMessage(message)
-  ])
+    new SystemMessage(
+      "You are a chat title generator. Generate a concise and descriptive title for the given chat message.",
+    ),
+    new HumanMessage(message),
+  ]);
 
   return response.text;
 }
