@@ -5,6 +5,8 @@ import authRouter from "./routes/auth.routes.js";
 import { ApiError } from "./utils/ApiError.js";
 import morgan from "morgan";
 import chatRouter from "./routes/chat.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 
@@ -18,8 +20,21 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"))
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const frontendPath = path.join(__dirname, "../public");
+app.use(express.static(frontendPath));
+
 app.use("/api/auth", authRouter);
 app.use("/api/chats", chatRouter);
+
+app.use((req, res, next) => {
+    if (req.path.startsWith("/api")) {
+        return next();
+    }
+    res.sendFile(path.join(frontendPath, "index.html"));
+});
 
 app.use((err, req, res, next) => {
     if (err instanceof ApiError) {

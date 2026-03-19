@@ -7,7 +7,7 @@ const Nav = () => {
                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12 duration-300">
                     <div className="w-4 h-4 bg-black rounded-sm rotate-45"></div>
                 </div>
-                <h1 className="text-xl font-bold tracking-tight text-white/90 group-hover:text-white transition-colors">Perplexity</h1>
+                <h1 className="text-xl font-bold tracking-tight text-white/90 group-hover:text-white transition-colors">AI Chatbot</h1>
             </div>
             <div className="flex-1" />
             <div className="flex items-center gap-4">
