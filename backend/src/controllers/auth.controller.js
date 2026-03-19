@@ -35,7 +35,12 @@ export const registerUser = asyncHandler(async (req, res) => {
     });
     
     const htmlContent = otpTemplate(otp, name);
-    await sendEmail(email, "Verify Your Email", `Your OTP is ${otp}`, htmlContent);
+    try {
+        await sendEmail(email, "Verify Your Email", `Your OTP is ${otp}`, htmlContent);
+    } catch (error) {
+        console.error("❌ Registration email failed:", error.message);
+        // We still proceed so the user is created, but they might need to resend OTP
+    }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1d",

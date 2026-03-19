@@ -1,24 +1,25 @@
-import { Resend } from "resend";
+import * as SibApiV3Sdk from "@getbrevo/brevo";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// Configure API key
+apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 export const sendEmail = async (to, subject, text, html) => {
     try {
-        const { error } = await resend.emails.send({
-            from: "onboarding@resend.dev",
-            to,
-            subject,
-            html: html || `<p>${text}</p>`,
-        });
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
-        if (error) {
-            console.error("❌ Failed to send email:", error.message);
-            throw new Error(`Failed to send email to ${to}`);
-        }
+        sendSmtpEmail.subject = subject;
+        sendSmtpEmail.htmlContent = html || `<p>${text}</p>`;
+        // Using the user's gmail as the sender since it's verified in their account
+        sendSmtpEmail.sender = { name: "AI Chatbot", email: "rishiranjan1703@gmail.com" };
+        sendSmtpEmail.to = [{ email: to }];
 
-        console.log(`✅ Email sent to ${to}`);
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log("✅ Email sent successfully via Brevo. Message ID:", data.messageId);
+        return data;
     } catch (error) {
-        console.error("❌ Failed to send email:", error.message);
-        throw new Error(`Failed to send email to ${to}`);
+        console.error("❌ Brevo Email Error:", error.response?.body || error.message);
+        throw new Error("Failed to send verification email");
     }
 };
