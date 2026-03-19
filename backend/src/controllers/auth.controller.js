@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { generateOTP } from "../utils/generateOTP.js";
-import { otpTemplate } from "../utils/emailTemplate.js";
+import { otpTemplate, resetPasswordTemplate } from "../utils/emailTemplate.js";
 
 export const registerUser = asyncHandler(async (req, res) => {
     const { name, email, username, password } = req.body;
@@ -204,5 +204,82 @@ export const getMe = asyncHandler(async (req, res) => {
     }
     res.status(200).json(
         new ApiResponse(200, { user }, "User fetched successfully")
+    );
+});
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    const otp = generateOTP();
+    user.otp = {
+        code: otp,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+    };
+    await user.save();
+    const htmlContent = resetPasswordTemplate(otp, user.name);
+    try {
+        await sendEmail(user.email, "Password Reset — AI Chatbot", `Your OTP is ${otp}`, htmlContent);
+    } catch (error) {
+        console.error("❌ Forgot password email failed:", error.message);
+        throw new ApiError(500, "Failed to send reset email. Please check your email configuration.");
+    }
+    res.status(200).json(
+        new ApiResponse(200, {}, "OTP sent successfully")
+    );
+});
+
+export const verifyResetOTP = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+    
+    if (!email || !otp) {
+        throw new ApiError(400, "Email and OTP are required");
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (user.otp.code !== otp) {
+        throw new ApiError(400, "Invalid OTP");
+    }
+
+    if (user.otp.expiresAt < Date.now()) {
+        throw new ApiError(400, "OTP has expired");
+    }
+
+    res.status(200).json(
+        new ApiResponse(200, {}, "OTP verified successfully")
+    );
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    
+    if (!email || !otp || !newPassword) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    if (user.otp.code !== otp) {
+        throw new ApiError(400, "Invalid OTP");
+    }
+    if (user.otp.expiresAt < Date.now()) {
+        throw new ApiError(400, "OTP has expired");
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = undefined;
+    await user.save();
+    res.status(200).json(
+        new ApiResponse(200, {}, "Password reset successfully")
     );
 });

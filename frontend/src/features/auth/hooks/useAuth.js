@@ -6,6 +6,9 @@ import {
   getMe,
   verifyOTP,
   sendOTP,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
   clearError
 } from "../auth.slice";
 
@@ -49,6 +52,30 @@ export const useAuth = () => {
     return { success: false, error: result.payload };
   };
 
+  const handleForgotPassword = async (email) => {
+    const result = await dispatch(forgotPassword(email));
+    if (forgotPassword.fulfilled.match(result)) {
+      return { success: true, data: result.payload };
+    }
+    return { success: false, error: result.payload };
+  };
+
+  const handleVerifyResetOTP = async (email, otp) => {
+    const result = await dispatch(verifyResetOTP({ email, otp }));
+    if (verifyResetOTP.fulfilled.match(result)) {
+      return { success: true, data: result.payload };
+    }
+    return { success: false, error: result.payload };
+  };
+
+  const handleResetPassword = async (email, otp, newPassword) => {
+    const result = await dispatch(resetPassword({ email, otp, newPassword }));
+    if (resetPassword.fulfilled.match(result)) {
+      return { success: true, data: result.payload };
+    }
+    return { success: false, error: result.payload };
+  };
+
   const handleClearError = () => dispatch(clearError());
 
   return {
@@ -62,6 +89,9 @@ export const useAuth = () => {
     handleGetMe,
     handleVerifyOTP,
     handleSendOTP,
+    handleForgotPassword,
+    handleVerifyResetOTP,
+    handleResetPassword,
     handleClearError
   };
 };

@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./features/auth/pages/LoginForm";
 import RegistrationForm from "./features/auth/pages/RegistrationForm";
 import VerifyOTP from "./features/auth/pages/VerifyOTP";
+import ForgotPassword from "./features/auth/pages/ForgotPassword";
+import ResetPassword from "./features/auth/pages/ResetPassword";
 import Dashboard from "./features/chat/pages/Dashboard";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 
@@ -21,6 +23,14 @@ export const router = createBrowserRouter([
   {
     path: "/verify-otp",
     element: <VerifyOTP />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
   {
     path: "/dashboard",

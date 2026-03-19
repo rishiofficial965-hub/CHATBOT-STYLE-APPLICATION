@@ -116,8 +116,7 @@ shadow-[0_0_20px_rgba(255,255,255,0.15)]"
             </button>
             <Link
               to="/forgot-password"
-              title="Coming soon"
-              className="text-white/40 hover:text-white transition-colors cursor-not-allowed"
+              className="text-white/40 hover:text-white transition-colors"
             >
               Forgot password?
             </Link>

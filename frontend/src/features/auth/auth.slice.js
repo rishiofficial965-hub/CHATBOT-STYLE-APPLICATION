@@ -4,7 +4,10 @@ import {
   login as loginApi, 
   getMe as getMeApi, 
   verifyOTP as verifyOTPApi, 
-  sendOTP as sendOTPApi 
+  sendOTP as sendOTPApi,
+  forgotPassword as forgotPasswordApi,
+  verifyResetOTP as verifyResetOTPApi,
+  resetPassword as resetPasswordApi
 } from "./services/auth.api";
 
 // Async Thunks
@@ -60,6 +63,39 @@ export const sendOTP = createAsyncThunk(
       return await sendOTPApi();
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Error resending OTP");
+    }
+  }
+);
+
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async (email, { rejectWithValue }) => {
+    try {
+      return await forgotPasswordApi(email);
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to send reset email");
+    }
+  }
+);
+
+export const verifyResetOTP = createAsyncThunk(
+  "auth/verifyResetOTP",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      return await verifyResetOTPApi(email, otp);
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Invalid or expired OTP");
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async ({ email, otp, newPassword }, { rejectWithValue }) => {
+    try {
+      return await resetPasswordApi(email, otp, newPassword);
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Password reset failed");
     }
   }
 );
@@ -140,6 +176,39 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(sendOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(verifyResetOTP.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyResetOTP.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(verifyResetOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

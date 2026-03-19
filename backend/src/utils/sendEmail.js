@@ -10,7 +10,7 @@ export const sendEmail = async (to, subject, text, html) => {
             subject: subject,
             htmlContent: html || `<p>${text}</p>`,
             textContent: text,
-            sender: { name: "AI Chatbot", email: "rishiranjan1703@gmail.com" },
+            sender: { name: "AI Chatbot", email: process.env.SENDER_EMAIL || "[EMAIL_ADDRESS]" },
             to: [{ email: to }],
         });
 

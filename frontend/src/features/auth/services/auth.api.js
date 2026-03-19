@@ -83,3 +83,30 @@ export async function updateProfile(profileData) {
     throw err;
   }
 }
+
+export async function forgotPassword(email) {
+  try {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function verifyResetOTP(email, otp) {
+  try {
+    const response = await api.post("/auth/verify-reset-otp", { email, otp });
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function resetPassword(email, otp, newPassword) {
+  try {
+    const response = await api.patch("/auth/reset-password", { email, otp, newPassword });
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}

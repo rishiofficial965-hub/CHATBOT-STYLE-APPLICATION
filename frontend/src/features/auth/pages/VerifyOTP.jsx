@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useNavigate, useLocation } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import Nav from "../components/Nav";
 import Loader from "../components/Loader";
 
@@ -9,13 +9,30 @@ const VerifyOTP = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const { handleVerifyOTP, handleSendOTP, loading, user } = useAuth();
+  const location = useLocation();
+  const { 
+    handleVerifyOTP, 
+    handleSendOTP, 
+    handleVerifyResetOTP,
+    handleForgotPassword,
+    loading, 
+    user 
+  } = useAuth();
+
+  const isResetFlow = location.state?.flow === "reset";
+  const resetEmail = location.state?.email;
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
+    if (isResetFlow) {
+      if (!resetEmail) {
+        navigate("/forgot-password");
+      }
+    } else {
+      if (!user) {
+        navigate("/login");
+      }
     }
-  }, [user, navigate]);
+  }, [user, isResetFlow, resetEmail, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,22 +44,41 @@ const VerifyOTP = () => {
       return;
     }
 
-    const result = await handleVerifyOTP(otp);
-    if (result.success) {
-      navigate("/dashboard");
+    if (isResetFlow) {
+      const result = await handleVerifyResetOTP(resetEmail, otp);
+      if (result.success) {
+        navigate("/reset-password", { state: { email: resetEmail, otp } });
+      } else {
+        setError(result.error || "Verification failed");
+      }
     } else {
-      setError(result.error || "Verification failed");
+      const result = await handleVerifyOTP(otp);
+      if (result.success) {
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Verification failed");
+      }
     }
   };
 
   const handleResend = async () => {
     setError("");
     setMessage("");
-    const result = await handleSendOTP();
-    if (result.success) {
-      setMessage("OTP resent successfully!");
+    
+    if (isResetFlow) {
+      const result = await handleForgotPassword(resetEmail);
+      if (result.success) {
+        setMessage("Reset code resent successfully!");
+      } else {
+        setError(result.error);
+      }
     } else {
-      setError(result.error);
+      const result = await handleSendOTP();
+      if (result.success) {
+        setMessage("OTP resent successfully!");
+      } else {
+        setError(result.error);
+      }
     }
   };
 
@@ -55,8 +91,7 @@ const VerifyOTP = () => {
     <main className="relative flex justify-center items-center h-screen bg-[#0d0d0d] overflow-hidden">
       <Nav />
       <div
-        className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 border border-white/10 rounded-2xl px-8 py-10 
-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+        className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 border border-white/10 rounded-2xl py-10 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
       >
         <div className="flex flex-col items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]">

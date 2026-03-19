@@ -9,7 +9,10 @@ const AppContent = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getMe());
+    const timer = setTimeout(() => {
+      dispatch(getMe());
+    }, 500);
+    return () => clearTimeout(timer);
   }, [dispatch]);
 
   return <RouterProvider router={router} />;
