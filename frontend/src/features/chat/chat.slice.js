@@ -6,8 +6,6 @@ import {
   deleteChat as deleteChatApi,
 } from "./services/chat.api";
 
-// ─── Async Thunks ─────────────────────────────────────────────────────────────
-
 export const fetchChats = createAsyncThunk(
   "chat/fetchChats",
   async (_, { rejectWithValue }) => {
@@ -56,16 +54,14 @@ export const removeChatThunk = createAsyncThunk(
   }
 );
 
-// ─── Slice ────────────────────────────────────────────────────────────────────
-
 const chatSlice = createSlice({
   name: "chat",
   initialState: {
-    chats: [],           // array of { _id, title, createdAt } for sidebar
+    chats: [],
     currentChatId: null,
-    messages: [],        // messages of the active chat
-    isLoading: false,    // loading sidebar chats
-    isSending: false,    // loading while sending/waiting for AI
+    messages: [],
+    isLoading: false,
+    isSending: false,
     error: null,
   },
   reducers: {
@@ -80,7 +76,6 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchChats
       .addCase(fetchChats.pending, (state) => { state.isLoading = true; })
       .addCase(fetchChats.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -90,7 +85,6 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // loadChat
       .addCase(loadChat.pending, (state) => { state.isSending = true; state.messages = []; })
       .addCase(loadChat.fulfilled, (state, action) => {
         state.isSending = false;
@@ -101,15 +95,12 @@ const chatSlice = createSlice({
         state.isSending = false;
         state.error = action.payload;
       })
-      // sendChatMessage
       .addCase(sendChatMessage.pending, (state) => { state.isSending = true; })
       .addCase(sendChatMessage.fulfilled, (state, action) => {
         state.isSending = false;
         const { chat, messages } = action.payload;
-        // Append new messages to the conversation
         state.messages = [...state.messages, ...messages];
         state.currentChatId = chat._id;
-        // If this was a new chat, add it to the top of sidebar
         const exists = state.chats.find((c) => c._id === chat._id);
         if (!exists) {
           state.chats = [{ _id: chat._id, title: chat.title }, ...state.chats];
@@ -119,7 +110,6 @@ const chatSlice = createSlice({
         state.isSending = false;
         state.error = action.payload;
       })
-      // removeChatThunk
       .addCase(removeChatThunk.fulfilled, (state, action) => {
         state.chats = state.chats.filter((c) => c._id !== action.payload);
         if (state.currentChatId === action.payload) {

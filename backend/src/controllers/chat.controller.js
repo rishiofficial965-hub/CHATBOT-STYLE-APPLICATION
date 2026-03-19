@@ -22,7 +22,6 @@ export async function sendMessage(req, res) {
       }
     }
 
-    // Save user message first
     const userMessage = await messageModel.create({
       chat: chat._id,
       role: "user",
@@ -31,7 +30,6 @@ export async function sendMessage(req, res) {
 
     chat.messages.push(userMessage._id);
 
-    // Build full conversation history for AI context
     const previousMessages = await messageModel
       .find({ chat: chat._id })
       .sort({ createdAt: 1 })

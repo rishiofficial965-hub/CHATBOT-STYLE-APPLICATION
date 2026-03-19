@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 export function initSocket(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.CORS_ORIGIN || "http://localhost:5173",
       credentials: true,
     },
   });
@@ -15,7 +15,6 @@ export function initSocket(httpServer) {
 
     socket.on("send-message", (message) => {
       console.log("Message received:", message);
-      // For now, let's just echo it back as a simple "AI" response
       setTimeout(() => {
         socket.emit("receive-message", `I received your message: "${message}". How can I help you further?`);
       }, 500);

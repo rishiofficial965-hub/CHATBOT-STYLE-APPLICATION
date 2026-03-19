@@ -83,7 +83,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Register
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -96,7 +95,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -109,7 +107,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Get Me
       .addCase(getMe.pending, (state) => {
         state.loading = true;
       })
@@ -123,7 +120,6 @@ const authSlice = createSlice({
         state.user = null;
         state.isInitialized = true;
       })
-      // Verify OTP
       .addCase(verifyOTP.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -136,7 +132,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Send OTP
       .addCase(sendOTP.pending, (state) => {
         state.loading = true;
         state.error = null;

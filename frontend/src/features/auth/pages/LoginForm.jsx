@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import Nav from "../components/Nav";
-import Loader from "../components/Loader";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -14,8 +13,6 @@ const LoginForm = () => {
   const navigate = useNavigate();
 
   const { handleLogin, loading } = useAuth();
-
-  if (loading) return <Loader />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -128,9 +125,10 @@ shadow-[0_0_20px_rgba(255,255,255,0.15)]"
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-white text-black font-semibold py-3.5 hover:bg-neutral-200 transition-all active:scale-[0.98] cursor-pointer mt-2 shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
+            disabled={loading}
+            className="w-full rounded-xl bg-white text-black font-semibold py-3.5 hover:bg-neutral-200 transition-all active:scale-[0.98] cursor-pointer mt-2 shadow-[0_4px_12px_rgba(0,0,0,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Continue
+            {loading ? "Signing in..." : "Continue"}
           </button>
         </form>
 
@@ -145,7 +143,6 @@ shadow-[0_0_20px_rgba(255,255,255,0.15)]"
         </p>
       </div>
 
-      {/* Absolute footer for legal info like OAI */}
       <div className="absolute bottom-6 flex gap-4 text-[11px] text-white/20 font-medium tracking-wide">
         <span>Terms of use</span>
         <span className="w-1 h-1 bg-white/10 rounded-full mt-1.5"></span>
