@@ -4,76 +4,77 @@ import messageModel from "../models/message.model.js";
 
 export async function sendMessage(req, res) {
   try {
-    const { message, chat: chatId } = req.body;
+    const { message, chatId } = req.body;
 
     let chat;
 
     if (!chatId) {
       const title = await generateChatTitle(message);
-
       chat = await chatModel.create({
         title,
         user: req.user._id,
         messages: [],
       });
     } else {
-      chat = await chatModel.findById(chatId);
-
+      chat = await chatModel.findOne({ _id: chatId, user: req.user._id });
       if (!chat) {
-        return res.status(404).json({
-          success: false,
-          msg: "Chat not found",
-        });
+        return res.status(404).json({ success: false, msg: "Chat not found" });
       }
     }
 
-    const result = await askAI(message);
-
+    // Save user message first
     const userMessage = await messageModel.create({
       chat: chat._id,
       role: "user",
       content: message,
     });
 
+    chat.messages.push(userMessage._id);
+
+    // Build full conversation history for AI context
+    const previousMessages = await messageModel
+      .find({ chat: chat._id })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const historyForAI = previousMessages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const aiResponse = await askAI(historyForAI);
+
     const aiMessage = await messageModel.create({
       chat: chat._id,
       role: "ai",
-      content: result,
+      content: aiResponse,
     });
 
-    chat.messages.push(userMessage._id, aiMessage._id);
+    chat.messages.push(aiMessage._id);
     await chat.save();
 
     return res.status(200).json({
       success: true,
-      chat,
+      chat: { _id: chat._id, title: chat.title },
       messages: [userMessage, aiMessage],
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      success: false,
-      msg: "Server error",
-    });
+    return res.status(500).json({ success: false, msg: "Server error" });
   }
 }
 
 export async function getChats(req, res) {
   try {
-    const chats = await chatModel.find({
-      user: req.user._id,
-    });
+    const chats = await chatModel
+      .find({ user: req.user._id })
+      .select("_id title createdAt")
+      .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      success: true,
-      chats,
-    });
+    return res.status(200).json({ success: true, chats });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      success: false,
-      msg: "Server error",
-    });
+    return res.status(500).json({ success: false, msg: "Server error" });
   }
 }
 
@@ -81,28 +82,20 @@ export async function getMessages(req, res) {
   const { chatId } = req.params;
 
   try {
-    const chat = await chatModel.findOne({
-      _id: chatId,
-      user: req.user._id,
-    });
+    const chat = await chatModel.findOne({ _id: chatId, user: req.user._id });
 
     if (!chat) {
-      return res.status(404).json({
-        success: false,
-        msg: "Chat not found",
-      });
+      return res.status(404).json({ success: false, msg: "Chat not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      chat,
-    });
+    const messages = await messageModel
+      .find({ chat: chatId })
+      .sort({ createdAt: 1 });
+
+    return res.status(200).json({ success: true, chat, messages });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      success: false,
-      msg: "Server error",
-    });
+    return res.status(500).json({ success: false, msg: "Server error" });
   }
 }
 
@@ -115,26 +108,16 @@ export async function deleteChat(req, res) {
       user: req.user._id,
     });
 
-    await messageModel.deleteMany({
-      chat: chatId,
-    });
-
     if (!chat) {
-      return res.status(404).json({
-        success: false,
-        msg: "Chat not found",
-      });
+      return res.status(404).json({ success: false, msg: "Chat not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      chat,
-    });
+    await messageModel.deleteMany({ chat: chatId });
+
+    return res.status(200).json({ success: true, msg: "Chat deleted" });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({
-      success: false,
-      msg: "Server error",
-    });
+    return res.status(500).json({ success: false, msg: "Server error" });
   }
 }
+
