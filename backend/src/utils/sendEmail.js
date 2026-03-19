@@ -37,11 +37,14 @@ const createTransporter = async () => {
 };
 
 export const sendEmail = async (to, subject, text, html) => {
-    try {
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Email sending timed out after 15 seconds")), 15000)
+    );
+
+    const send = async () => {
         const transporter = await createTransporter();
         await transporter.verify();
         console.log("✅ SMTP connection verified");
-
         const info = await transporter.sendMail({
             from: process.env.GOOGLE_USER,
             to,
@@ -50,6 +53,10 @@ export const sendEmail = async (to, subject, text, html) => {
             html,
         });
         console.log(`✅ Email sent to ${to} | Message ID: ${info.messageId}`);
+    };
+
+    try {
+        await Promise.race([send(), timeout]);
     } catch (error) {
         console.error("❌ Failed to send email:", error.message);
         throw new Error(`Failed to send email to ${to}`);
