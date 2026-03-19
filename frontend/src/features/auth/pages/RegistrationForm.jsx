@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import Nav from "../components/Nav";
-import Loader from "../components/Loader";
 
 const RegistrationForm = () => {
   const [name, setName] = useState("");
@@ -14,7 +13,6 @@ const RegistrationForm = () => {
   const navigate = useNavigate();
 
   const { handleRegister, loading } = useAuth();
-  if (loading) return <Loader />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,9 +107,10 @@ shadow-[0_0_20px_rgba(255,255,255,0.15)]"
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-white text-black font-semibold py-3.5 hover:bg-neutral-200 transition-all active:scale-[0.98] cursor-pointer mt-3 shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
+            disabled={loading}
+            className="w-full rounded-xl bg-white text-black font-semibold py-3.5 hover:bg-neutral-200 transition-all active:scale-[0.98] cursor-pointer mt-3 shadow-[0_4px_12px_rgba(0,0,0,0.1)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Sign up
+            {loading ? "Creating account..." : "Sign up"}
           </button>
         </form>
 

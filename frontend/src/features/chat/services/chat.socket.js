@@ -2,8 +2,6 @@ import { io } from "socket.io-client";
 
 
 export const initializeSocketConnection = () => {
-    // In production (Render), connect to the same host that served the site ("/")
-    // In local development, connect directly to the backend port 3000
     const SOCKET_URL = import.meta.env.PROD ? "/" : "http://localhost:3000";
     
     const socket = io(SOCKET_URL, {
