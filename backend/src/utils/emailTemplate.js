@@ -79,7 +79,7 @@ export const otpTemplate = (otp, name) => {
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">Perplexity Clone</div>
+                <div class="logo">AI Chatbot</div>
             </div>
             <div class="content">
                 <h1>Verify Your Account</h1>
