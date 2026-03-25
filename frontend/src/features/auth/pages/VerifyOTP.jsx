@@ -10,13 +10,13 @@ const VerifyOTP = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { 
-    handleVerifyOTP, 
-    handleSendOTP, 
+  const {
+    handleVerifyOTP,
+    handleSendOTP,
     handleVerifyResetOTP,
     handleForgotPassword,
-    loading, 
-    user 
+    loading,
+    user,
   } = useAuth();
 
   const isResetFlow = location.state?.flow === "reset";
@@ -64,7 +64,7 @@ const VerifyOTP = () => {
   const handleResend = async () => {
     setError("");
     setMessage("");
-    
+
     if (isResetFlow) {
       const result = await handleForgotPassword(resetEmail);
       if (result.success) {
@@ -90,9 +90,7 @@ const VerifyOTP = () => {
   return (
     <main className="relative flex justify-center items-center h-screen bg-[#0d0d0d] overflow-hidden">
       <Nav />
-      <div
-        className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 border border-white/10 rounded-2xl py-10 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
-      >
+      <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-sm px-6 border border-white/10 rounded-2xl py-10 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
         <div className="flex flex-col items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(255,255,255,0.15)]">
             <i className="ri-shield-check-line text-black text-2xl"></i>

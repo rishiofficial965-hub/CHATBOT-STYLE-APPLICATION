@@ -1,4 +1,5 @@
 import { askAI, generateChatTitle } from "../services/ai.service.js";
+import { storeDocument } from "../services/vector.service.js";
 import chatModel from "../models/chat.model.js";
 import messageModel from "../models/message.model.js";
 
@@ -40,16 +41,28 @@ export async function sendMessage(req, res) {
       content: m.content,
     }));
 
-    const aiResponse = await askAI(historyForAI);
+    // ── Ask AI with web search + vector context ──
+    const aiResult = await askAI(historyForAI, {
+      useWebSearch: true,
+      latestQuery: message,
+      userId: req.user._id.toString(),
+    });
 
     const aiMessage = await messageModel.create({
       chat: chat._id,
       role: "ai",
-      content: aiResponse,
+      content: aiResult.content,
+      sources: aiResult.sources || [],
     });
 
     chat.messages.push(aiMessage._id);
     await chat.save();
+
+    // ── Store conversation in Pinecone for future retrieval (fire-and-forget) ──
+    storeDocument(`User: ${message}\nAssistant: ${aiResult.content}`, {
+      chatId: chat._id.toString(),
+      userId: req.user._id.toString(),
+    }).catch((err) => console.error("Vector store error:", err.message));
 
     return res.status(200).json({
       success: true,
@@ -118,4 +131,3 @@ export async function deleteChat(req, res) {
     return res.status(500).json({ success: false, msg: "Server error" });
   }
 }
-

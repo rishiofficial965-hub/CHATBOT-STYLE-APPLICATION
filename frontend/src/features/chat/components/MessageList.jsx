@@ -62,6 +62,44 @@ const MarkdownContent = ({ content }) => (
     </ReactMarkdown>
 );
 
+const SourceCards = ({ sources }) => {
+    if (!sources || sources.length === 0) return null;
+
+    return (
+        <div className="mt-4 pl-1">
+            <div className="flex items-center gap-2 mb-2.5">
+                <i className="ri-global-line text-white/30 text-sm"></i>
+                <span className="text-white/40 text-xs font-medium uppercase tracking-wider">Sources</span>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10">
+                {sources.map((source, idx) => (
+                    <a
+                        key={idx}
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 w-56 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-white/15 rounded-xl p-3.5 transition-all duration-300 group"
+                    >
+                        <div className="flex items-start gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-md bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i className="ri-link text-white/40 text-xs"></i>
+                            </div>
+                            <p className="text-white/80 text-xs font-medium leading-snug line-clamp-2 group-hover:text-white/95 transition-colors">
+                                {source.title}
+                            </p>
+                        </div>
+                        {source.snippet && (
+                            <p className="text-white/30 text-[11px] leading-relaxed line-clamp-2 ml-7">
+                                {source.snippet}
+                            </p>
+                        )}
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const MessageList = ({ messages, isSending }) => {
     const bottomRef = useRef(null);
 
@@ -113,6 +151,9 @@ const MessageList = ({ messages, isSending }) => {
                                         <p className="whitespace-pre-wrap">{msg.content}</p>
                                     )}
                                 </div>
+
+                                {/* Source cards for AI messages */}
+                                {isAI(msg.role) && <SourceCards sources={msg.sources} />}
 
                                 {isAI(msg.role) && (
                                     <div className="flex items-center gap-5 mt-1 px-2 text-white/15">
