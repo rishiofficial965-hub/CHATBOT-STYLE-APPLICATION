@@ -41,7 +41,6 @@ export async function sendMessage(req, res) {
       content: m.content,
     }));
 
-    // ── Ask AI with web search + vector context ──
     const aiResult = await askAI(historyForAI, {
       useWebSearch: true,
       latestQuery: message,
@@ -58,7 +57,6 @@ export async function sendMessage(req, res) {
     chat.messages.push(aiMessage._id);
     await chat.save();
 
-    // ── Store conversation in Pinecone for future retrieval (fire-and-forget) ──
     storeDocument(`User: ${message}\nAssistant: ${aiResult.content}`, {
       chatId: chat._id.toString(),
       userId: req.user._id.toString(),
